@@ -17,7 +17,7 @@ describe DataMask do
   end
 
   after(:all) do
-    Sequel.connect("%{adapter}://%{host}:%{port}" % @db_conf[:from]) do |db|
+    Sequel.connect("%{adapter}://%{host}" % @db_conf[:from]) do |db|
       begin
         db.run("DROP DATABASE %{database}" % @db_conf[:from])
         db.run("DROP DATABASE %{database}" % @db_conf[:to])

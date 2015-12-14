@@ -1,7 +1,7 @@
 require 'sequel'
 
 require 'data_mask/config'
-require 'data_mask/shell'
+require 'data_mask/db_shell'
 
 module DataMask
   class Mask
@@ -15,7 +15,9 @@ module DataMask
     end
 
     def migrate
-      Shell.send(@db_conf[:to][:adapter] + '_migrate', @db_conf[:from], @db_conf[:to])
+      remote = DBShell.new(@db_conf[:from]).export
+      local = DBShell.new(@db_conf[:to]).import
+      system "#{remote} | #{local}"
     end
 
     def play
@@ -23,7 +25,7 @@ module DataMask
     end
 
     def export
-      Shell.send(@db_conf[:to][:adapter] + '_export', @db_conf[:to])
+      system DBShell.new(@db_conf[:to]).export(to_file = true)
     end
 
     def tmp_db_clear
@@ -41,18 +43,14 @@ module DataMask
       operate_db('create')
       migrate
       play
-      export
     end
 
 
     private
 
     def build_url_without_db(data)
-      "%{adapter}://%{host}:%{port}" % data
-    end
-
-    def build_url(data)
-      "%{adapter}://%{host}:%{port}/%{database}" % data
+      return "%{adapter}://%{host}:%{port}" % data if data[:port]
+      "%{adapter}://%{host}" % data
     end
 
     def parse_mask(mask, binding)
@@ -64,7 +62,7 @@ module DataMask
     end
 
     def mask(config, tasks)
-      db = Sequel.connect(build_url(config))
+      db = Sequel.connect(config)
 
       tasks.each do |table, task|
         table = db[table]
