@@ -2,6 +2,7 @@ require 'sequel'
 
 require 'data_mask/config'
 require 'data_mask/migrate'
+require 'data_mask/export'
 
 module DataMask
   class Mask
@@ -11,12 +12,7 @@ module DataMask
     end
 
     def operate_db(op)
-      Sequel.connect(build_url_without_db(@db_conf[:to])) do |db|
-        begin
-          db.run("#{op.upcase} DATABASE %{database}" % @db_conf[:to])
-        rescue
-        end
-      end
+      execute_sql "#{op.upcase} DATABASE %{database}" % @db_conf[:to]
     end
 
     def migrate
@@ -27,10 +23,26 @@ module DataMask
       mask(@db_conf[:to], @tasks)
     end
 
+    def export
+      Export.send(@db_conf[:to][:adapter], @db_conf[:to])
+    end
+
+    def tmp_db_clear
+      return if
+      if @db_conf[:to][:adapter] == 'postgres'
+        # Force drop db while others may be connected
+        execute_sql 'select pg_terminate_backend(procpid)' \
+          " from pg_stat_activity where datname=’%{database}’" % @db_conf[:to]
+      end
+      execute_sql "DROP DATABASE  IF EXISTS %{database}" % @db_conf[:to]
+    end
+
     def run
+      tmp_db_clear
       operate_db('create')
       migrate
       play
+      export
     end
 
 
@@ -71,5 +83,15 @@ module DataMask
 
       db.disconnect
     end
+
+    def execute_sql(sql)
+      Sequel.connect(build_url_without_db(@db_conf[:to])) do |db|
+        begin
+          db.run sql
+        rescue
+        end
+      end
+    end
+
   end
 end

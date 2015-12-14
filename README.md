@@ -32,10 +32,13 @@ mask.run
 or
 ```ruby
 mask = DataMask::Mask.new('path/with/your/database.yml_&_task.yml') # Default 'config/'
+mask.tmp_db_clear
 mask.operate_db('create')
 mask.migrate
 mask.play
 ```
+
+And you may use `mask.export` to export the database to *.sql* file.
 
 In `.yml` files, you can use `%=` for eval the content.
 
@@ -67,8 +70,8 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/cuebyte/data_mask. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
 
-
 ## License
+Authored by [cuebyte](https://github.com/cuebyte). Copyright (c) 2015 [ZhuluX Team](https://github.com/zhulux/).
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
 
