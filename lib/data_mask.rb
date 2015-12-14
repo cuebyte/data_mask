@@ -1,8 +1,7 @@
 require 'sequel'
 
 require 'data_mask/config'
-require 'data_mask/migrate'
-require 'data_mask/export'
+require 'data_mask/shell'
 
 module DataMask
   class Mask
@@ -16,7 +15,7 @@ module DataMask
     end
 
     def migrate
-      Migrate.send(@db_conf[:to][:adapter], @db_conf[:from], @db_conf[:to])
+      Shell.send(@db_conf[:to][:adapter] + '_migrate', @db_conf[:from], @db_conf[:to])
     end
 
     def play
@@ -24,7 +23,7 @@ module DataMask
     end
 
     def export
-      Export.send(@db_conf[:to][:adapter], @db_conf[:to])
+      Shell.send(@db_conf[:to][:adapter] + '_export', @db_conf[:to])
     end
 
     def tmp_db_clear
