@@ -3,7 +3,6 @@ default: &default
   host: localhost
   port: 5432
   user: cuebyte
-  password: shanghaid
 
 from:
   <<: *default
