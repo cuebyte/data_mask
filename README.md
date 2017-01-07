@@ -58,7 +58,7 @@ If you need to set each row with different value, you can just use `each_row`, l
 users:
   mobile: 18600000000
   each_row:
-    email: '%= row[:id].to_s + "@zhulux.qa"'
+    email: '%= row[:id].to_s + "@cuebyte.moe"'
 ```
 the `row` this the object of each row, which type is Hash.
 
